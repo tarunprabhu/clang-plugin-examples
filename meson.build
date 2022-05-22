@@ -28,7 +28,7 @@ project('clang-plugin-examples', ['c', 'cpp'],
 # TODO: At some point, make this a user-configurable option. Given how fast
 # LLVM changes and breaks itself, there is every likelihood that changes will
 # need to be made to the examples depending on the version.
-llvm = dependency('llvm', version: ['>=13'])
+llvm = dependency('llvm', version: ['>=13', '<=14'])
 
 # Clang does not use pkgconfig and cmake cannot find it either.
 # FIXME: This is not the right way of doing things because it will not be able
@@ -41,5 +41,6 @@ incdir = include_directories([llvm.get_variable(configtool: 'includedir'),
                               'common'])
 
 subdir('common')
-# subdir('loop-demarcator')
 subdir('ast-ir-match')
+# subdir('loop-demarcator')
+subdir('loop-extractor')
