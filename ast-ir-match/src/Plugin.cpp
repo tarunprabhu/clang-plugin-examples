@@ -160,12 +160,9 @@ protected:
     return true;
   }
 
-  // This will be run after the main action. If the main action is codegen (in
+  // This will be run before the main action. If the main action is codegen (in
   // clang-speak, codegen is understood to be LLVM-IR generation), this will be
-  // run after LLVM-IR is generated. In many cases, it may be desirable to run
-  // the IR passes after the AST information has been collected. However,
-  // clang deletes the AST nodes once the IR is generated, so this cannot be
-  // run before the main action.
+  // run before LLVM-IR is generated.
   virtual ActionType getActionType() override {
     return PluginASTAction::ActionType::AddBeforeMainAction;
   }
