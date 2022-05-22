@@ -1,0 +1,16 @@
+BasedOnStyle: LLVM
+SpaceBeforeParens: ControlStatements
+PointerAlignment: Left
+AlignEscapedNewlines: Left
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortLambdasOnASingleLine: Inline
+AlwaysBreakTemplateDeclarations: Yes
+Cpp11BracedListStyle: true
+IndentCaseLabels: false
+SpaceAfterCStyleCast: false
+SpacesInAngles: false
+Standard: c++14
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBinaryOperators: All
