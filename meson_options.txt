@@ -14,8 +14,8 @@
 #  limitations under the License.
 #
 
-shared_library('LoopExtractorPlugin',
-               ['src/Plugin.cpp'],
-               name_prefix: '',
-               include_directories: incdirs,
-               dependencies: extlibs)
+option('with-llvm-config',
+       type: 'string',
+       value: 'llvm-config',
+       description: 'Use a specific llvm-config binary to determine which ' +
+                    'LLVM libraries to link against.')

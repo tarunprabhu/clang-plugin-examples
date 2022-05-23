@@ -25,20 +25,39 @@ project('clang-plugin-examples', ['c', 'cpp'],
         ],
         meson_version: '>=0.55')
 
+fs = import('fs')
+
+llvm_config_bin = get_option('with-llvm-config')
+if (llvm_config_bin != 'llvm-config')
+  llvm_config = find_program([llvm_config_bin, 'llvm-config'], required: true)
+else
+  llvm_config = find_program('llvm-config', required: true)
+endif
+
+llvm_version = run_command(llvm_config, '--version', check: true)\
+                          .stdout().strip()
+message('LLVM version: ' + llvm_version)
+
 # TODO: At some point, make this a user-configurable option. Given how fast
 # LLVM changes and breaks itself, there is every likelihood that changes will
 # need to be made to the examples depending on the version.
-llvm = dependency('llvm', version: ['>=13', '<=14'])
+if (not (llvm_version.version_compare('>=13') and
+         llvm_version.version_compare('<=14')))
+  error('LLVM version not supported')
+endif
 
-# Clang does not use pkgconfig and cmake cannot find it either.
-# FIXME: This is not the right way of doing things because it will not be able
-# to use an LLVM installation in a non-system path. At some point, should
-# really try to support that.
-libclang = meson.get_compiler('cpp').find_library('libclang')
-libclang_cpp = meson.get_compiler('cpp').find_library('libclang-cpp')
+llvm_incdir = run_command(llvm_config, '--includedir', check: true)\
+                         .stdout().strip()
+llvm_libdir = run_command(llvm_config, '--libdir', check: true)\
+                         .stdout().strip()
 
-incdir = include_directories([llvm.get_variable(configtool: 'includedir'),
-                              'common'])
+cxx = meson.get_compiler('cpp')
+libclang = cxx.find_library('libclang', dirs: llvm_libdir, required: true)
+libclang_cpp = cxx.find_library('libclang-cpp', dirs: llvm_libdir, required: true)
+libllvm = cxx.find_library('libLLVM', dirs: llvm_libdir, required: true)
+
+incdirs = include_directories([llvm_incdir, 'common'])
+extlibs = [libclang, libclang_cpp, libllvm]
 
 subdir('common')
 subdir('ast-ir-match')

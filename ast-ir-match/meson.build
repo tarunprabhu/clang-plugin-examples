@@ -26,19 +26,19 @@ lib_common = static_library('AstIrMatchCommon',
                             ['src/AstIrContext.cpp',
                              'src/Singleton.cpp'],
                             install: false,
-                            include_directories: incdir,
-                            dependencies: [libclang, libclang_cpp, llvm])
+                            include_directories: incdirs,
+                            dependencies: extlibs)
 
 shared_library('AstIrMatchPlugin',
                ['src/Plugin.cpp'],
                name_prefix: '',
-               include_directories: incdir,
-               dependencies: [libclang, libclang_cpp, llvm],
+               include_directories: incdirs,
+               dependencies: extlibs,
                link_with: [lib_common])
 
 shared_library('AstIrMatchPasses',
                ['src/FunctionSourceLocPass.cpp'],
                name_prefix: '',
-               include_directories: incdir,
-               dependencies: [libclang, libclang_cpp, llvm],
+               include_directories: incdirs,
+               dependencies: extlibs,
                link_with: [lib_common])

@@ -41,6 +41,13 @@ cd /path/to/source/clang-plugin-examples
 meson /path/to/build-dir
 ```
 
+In order to use LLVM installed to a non-standard location, use the 
+`with-llvm-config` option and pass the full path to the `llvm-config` executable.
+
+```
+meson -Dwith-llvm-config=/path/to/llvm-config /path/to/build-dir
+```
+
 Finally, switch to the build directory and compile the plugins.
 
 ```
