@@ -54,9 +54,3 @@ Finally, switch to the build directory and compile the plugins.
 cd /path/to/build-dir
 meson compile
 ```
-
-# Limitations
-
-Currently, apart from the limitation on the Clang/LLVM versions that are 
-supported, there is no easy way to use an LLVM installation from a 
-non-standard location.
