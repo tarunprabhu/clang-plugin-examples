@@ -16,18 +16,13 @@
 
 #include <clang/AST/Mangle.h>
 #include <clang/AST/RecursiveASTVisitor.h>
-#include <clang/AST/Stmt.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/FrontendAction.h>
 #include <clang/Frontend/FrontendPluginRegistry.h>
-#include <clang/Lex/Preprocessor.h>
 
-#include <llvm/IR/Function.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include <map>
 #include <memory>
-#include <set>
 
 #include "AstIrContext.h"
 #include "Singleton.h"
@@ -73,7 +68,7 @@ public:
 
   virtual ~FunctionVisitor() = default;
 
-  virtual bool VisitFunctionDecl(FunctionDecl* decl) {
+  bool VisitFunctionDecl(FunctionDecl* decl) {
     if (decl->hasBody() and (getFileName(decl) == this->srcFile))
       if (not(isa<CXXConstructorDecl>(decl) or isa<CXXDestructorDecl>(decl)))
         this->astIrContext.addDecl(getMangledName(decl), decl);
@@ -115,7 +110,7 @@ public:
   }
 
 protected:
-  virtual std::unique_ptr<ASTConsumer>
+  std::unique_ptr<ASTConsumer>
   CreateASTConsumer(CompilerInstance& compiler, StringRef srcFile) override {
     // Since this is done before codegen, clang might delete the ASTContext to
     // reduce memory usage. But we need it around because the IR passes that

@@ -61,42 +61,42 @@ public:
     return true;
   }
 
+  // Don't put braces around an else if the only statement within it is an
+  // if. While it is not incorrect to do so, the idea is to put braces in
+  // a more "natural" manner. Putting braces in an if-else-if ladder, and
+  // turning this
+  //
+  //     if (cond0)
+  //     else if (cond1)
+  //     else if (cond2)
+  //     else
+  //
+  // into something like this
+  //
+  //     if (cond0) {
+  //     } else {
+  //         if (cond1) {
+  //         } else {
+  //             if (cond2) {
+  //             } else {
+  //             }
+  //         }
+  //     }
+  //
+  // is, arguably, not terribly natural. The following is, again arguably,
+  // better.
+  //
+  //     if (cond0) {
+  //     } else if (cond1) {
+  //     } else if (cond2) {
+  //     } else {
+  //     }
+  //
   bool VisitIfStmt(IfStmt* ifStmt) {
     if (Stmt* then = ifStmt->getThen())
       if (Stmt* newThen = this->maybeWrapStmt(then))
         ifStmt->setThen(newThen);
 
-    // Don't put braces around an else if the only statement within it is an
-    // if. While it is not incorrect to do so, the idea is to put braces in
-    // a more "natural" manner. Putting braces in an if-else-if ladder, and
-    // turning this
-    //
-    //     if (cond0)
-    //     else if (cond1)
-    //     else if (cond2)
-    //     else
-    //
-    // into something like this
-    //
-    //     if (cond0) {
-    //     } else {
-    //         if (cond1) {
-    //         } else {
-    //             if (cond2) {
-    //             } else {
-    //             }
-    //         }
-    //     }
-    //
-    // is, arguably, not terribly natural. The following is, again arguably,
-    // better.
-    //
-    //     if (cond0) {
-    //     } else if (cond1) {
-    //     } else if (cond2) {
-    //     } else {
-    //     }
-    //
     if (Stmt* els = ifStmt->getElse())
       if (not isa<IfStmt>(els))
         if (Stmt* newEls = this->maybeWrapStmt(els))
@@ -128,7 +128,7 @@ public:
 // specialized ASTConsumer object.
 class Plugin : public PluginASTAction {
 protected:
-  virtual std::unique_ptr<ASTConsumer>
+  std::unique_ptr<ASTConsumer>
   CreateASTConsumer(CompilerInstance& compiler, StringRef) override {
     return std::make_unique<Consumer>(compiler);
   }

@@ -14,19 +14,10 @@
   limitations under the License.
 */
 
-#include <clang/AST/Mangle.h>
 #include <clang/AST/RecursiveASTVisitor.h>
-#include <clang/AST/Stmt.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/FrontendAction.h>
 #include <clang/Frontend/FrontendPluginRegistry.h>
-#include <clang/Lex/Preprocessor.h>
-
-#include <llvm/IR/Function.h>
-#include <llvm/Passes/PassBuilder.h>
-#include <llvm/Passes/PassPlugin.h>
-#include <llvm/Support/raw_ostream.h>
-#include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
 #include <limits>
 #include <memory>
@@ -113,11 +104,11 @@ private:
 protected:
   std::string loopType(Stmt* stmt) {
     switch (stmt->getStmtClass()) {
-    case clang::Stmt::ForStmtClass:
+    case Stmt::ForStmtClass:
       return "for";
-    case clang::Stmt::WhileStmtClass:
+    case Stmt::WhileStmtClass:
       return "while";
-    case clang::Stmt::DoStmtClass:
+    case Stmt::DoStmtClass:
       return "do";
     default:
       return "<unknown>";
@@ -147,21 +138,21 @@ public:
   // idea here is to allow the visitor to traverse over those as well, but
   // that hasn't been tested and I am not sure if it works the way I think
   // it does.
-  virtual bool shouldVisitTemplateInstantiations() const {
+  bool shouldVisitTemplateInstantiations() const {
     return true;
   }
 
-  virtual bool VisitForStmt(ForStmt* stmt) {
+  bool VisitForStmt(ForStmt* stmt) {
     this->associate(stmt);
     return true;
   }
 
-  virtual bool VisitDoStmt(DoStmt* stmt) {
+  bool VisitDoStmt(DoStmt* stmt) {
     this->associate(stmt);
     return true;
   }
 
-  virtual bool VisitWhileStmt(WhileStmt* stmt) {
+  bool VisitWhileStmt(WhileStmt* stmt) {
     this->associate(stmt);
     return true;
   }
@@ -202,7 +193,7 @@ public:
 // specialized ASTConsumer object.
 class ExtractPlugin : public PluginASTAction {
 protected:
-  virtual std::unique_ptr<ASTConsumer>
+  std::unique_ptr<ASTConsumer>
   CreateASTConsumer(CompilerInstance& compiler, StringRef file) override {
     gPragmas.setFile(file);
     return std::make_unique<ExtractConsumer>(compiler, gPragmas);
