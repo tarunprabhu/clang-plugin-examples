@@ -120,7 +120,15 @@ public:
   virtual ~Consumer() = default;
 
   virtual void HandleTranslationUnit(ASTContext& context) {
-    visitor.TraverseDecl(context.getTranslationUnitDecl());
+    // This is a DeclContext corresponding to the top level of the source file
+    // being compiled.
+    TranslationUnitDecl* tu = context.getTranslationUnitDecl();
+
+    visitor.TraverseDecl(tu);
+
+    // This will dump everything in the top-level decl. This will include
+    // everything that was pulled in from include files.
+    tu->dumpDeclContext();
   }
 };
 
@@ -140,7 +148,8 @@ protected:
         llvm::errs() << "\nThis is an example plugin to show how a plugin can "
                      << "be used to modify the AST. In this case, it will add "
                      << "braces to loops and conditional statements that do "
-                     << "not have them.\n\n";
+                     << "not have them. The modified source will be printed to "
+                     << "stderr\n\n";
     return true;
   }
 
