@@ -42,7 +42,7 @@ message('LLVM version: ' + llvm_version)
 # LLVM changes and breaks itself, there is every likelihood that changes will
 # need to be made to the examples depending on the version.
 if (not (llvm_version.version_compare('>=13') and
-         llvm_version.version_compare('<=14')))
+         llvm_version.version_compare('<14')))
   error('LLVM version not supported')
 endif
 
@@ -60,6 +60,7 @@ incdirs = include_directories([llvm_incdir, 'common'])
 extlibs = [libclang, libclang_cpp, libllvm]
 
 subdir('common')
+subdir('add-braces')
 subdir('ast-ir-match')
 # subdir('loop-demarcator')
 subdir('loop-extractor')
