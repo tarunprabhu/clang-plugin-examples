@@ -16,6 +16,7 @@
 
 config = configuration_data()
 config.set('version', meson.project_version())
+
 configure_file(input: 'config.h.in',
                output: 'config.h',
                configuration: config)
