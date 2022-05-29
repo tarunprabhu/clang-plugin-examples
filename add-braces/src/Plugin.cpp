@@ -110,16 +110,23 @@ public:
 // traverse the entire translation unit.
 class Consumer : public ASTConsumer {
 private:
+  CompilerInstance& ci;
   Visitor visitor;
 
 public:
-  explicit Consumer(CompilerInstance& compiler) : visitor(compiler) {
+  explicit Consumer(CompilerInstance& ci) : ci(ci), visitor(ci) {
     ;
   }
 
   virtual ~Consumer() = default;
 
   virtual void HandleTranslationUnit(ASTContext& context) {
+    // If there are parse errors in the file, they will be recorded in the
+    // diagnostics. Since this will not attempt to fix those, don't go any
+    // further here.
+    if (this->ci.getDiagnostics().getNumErrors())
+      return;
+
     // This is a DeclContext corresponding to the top level of the source file
     // being compiled.
     TranslationUnitDecl* tu = context.getTranslationUnitDecl();
@@ -136,8 +143,8 @@ public:
 // specialized ASTConsumer object.
 class Plugin : public PluginASTAction {
 protected:
-  std::unique_ptr<ASTConsumer>
-  CreateASTConsumer(CompilerInstance& compiler, StringRef) override {
+  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance& compiler,
+                                                 StringRef) override {
     return std::make_unique<Consumer>(compiler);
   }
 

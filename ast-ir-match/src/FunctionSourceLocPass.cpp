@@ -21,8 +21,8 @@
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
 #include "AstIrContext.h"
+#include "Config.h"
 #include "Singleton.h"
-#include "config.h"
 
 using namespace llvm;
 

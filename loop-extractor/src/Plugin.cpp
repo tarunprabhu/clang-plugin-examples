@@ -93,7 +93,7 @@ static thread_local Pragmas gPragmas;
 
 // The visitor class will visit all the AST nodes and is where the loops will
 // be identified and associated with a pragma.
-class ExtractVisitor : public RecursiveASTVisitor<ExtractVisitor> {
+class Visitor : public RecursiveASTVisitor<Visitor> {
 private:
   SourceManager& srcMgr;
 
@@ -126,12 +126,12 @@ protected:
   }
 
 public:
-  explicit ExtractVisitor(CompilerInstance& compiler, Pragmas& pragmas)
+  explicit Visitor(CompilerInstance& compiler, Pragmas& pragmas)
       : srcMgr(compiler.getSourceManager()), pragmas(pragmas) {
     ;
   }
 
-  virtual ~ExtractVisitor() = default;
+  virtual ~Visitor() = default;
 
   // TODO: Should try to see what happens if a pragma is put inside a
   // template body which may be instantiated several times. I think the
@@ -160,22 +160,22 @@ public:
 
 // The consumer class does nothing, but merely calls the visitor class to
 // traverse the entire translation unit.
-class ExtractConsumer : public ASTConsumer {
+class Consumer : public ASTConsumer {
 private:
   // This is a reference to be the global singleton Pragmas object.
   // By keeping a local reference, we want to ensure that if we can ever get
   // rid of the need for a global singleton, most of the code would not need
   // to be changed.
   Pragmas& pragmas;
-  ExtractVisitor visitor;
+  Visitor visitor;
 
 public:
-  explicit ExtractConsumer(CompilerInstance& compiler, Pragmas& pragmas)
+  explicit Consumer(CompilerInstance& compiler, Pragmas& pragmas)
       : pragmas(pragmas), visitor(compiler, pragmas) {
     ;
   }
 
-  virtual ~ExtractConsumer() = default;
+  virtual ~Consumer() = default;
 
   virtual void HandleTranslationUnit(ASTContext& context) {
     visitor.TraverseDecl(context.getTranslationUnitDecl());
@@ -191,12 +191,12 @@ public:
 
 // This is the main plugin class. It does nothing much beyond returning a
 // specialized ASTConsumer object.
-class ExtractPlugin : public PluginASTAction {
+class Plugin : public PluginASTAction {
 protected:
   std::unique_ptr<ASTConsumer>
   CreateASTConsumer(CompilerInstance& compiler, StringRef file) override {
     gPragmas.setFile(file);
-    return std::make_unique<ExtractConsumer>(compiler, gPragmas);
+    return std::make_unique<Consumer>(compiler, gPragmas);
   }
 
   virtual bool ParseArgs(const CompilerInstance&,
@@ -237,7 +237,7 @@ private:
   Pragmas& pragmas;
 
 public:
-  // Here "extract" is the sentinel of the pragma that will be matched.
+  // Here, "extract" is the sentinel of the pragma that will be matched.
   ExtractPragmaHandler() : PragmaHandler("extract"), pragmas(gPragmas) {
     ;
   }
@@ -253,11 +253,15 @@ public:
   }
 };
 
+// Adding the pragma handler to the PragmaHandlerRegistry ensures that it is
+// automatically run. For more control over whether or not the handler is run,
+// it would need to be explicitly added to the Preprocessor using
+// AddPragmaHandler.
 static PragmaHandlerRegistry::Add<ExtractPragmaHandler>
     ExtractPragmaHandlerX("extract-pragma-handler",
                           "Pragma to annotate loops that will be extacted "
                           "and printed.");
 
-static FrontendPluginRegistry::Add<ExtractPlugin>
+static FrontendPluginRegistry::Add<Plugin>
     ExtractPluginX("loop-extractor",
                    "Associates an extract pragma with a loop.");

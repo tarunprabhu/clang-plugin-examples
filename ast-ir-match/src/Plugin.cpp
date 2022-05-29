@@ -29,9 +29,9 @@
 
 using namespace clang;
 
-// The visitor is visits the FunctionDecl's and saves those that are defined
+// The visitor visits the FunctionDecl's and saves those that are defined
 // in the source file that is currently being processed.
-class FunctionVisitor : public RecursiveASTVisitor<FunctionVisitor> {
+class Visitor : public RecursiveASTVisitor<Visitor> {
 private:
   std::string srcFile;
   SourceManager& srcMgr;
@@ -57,16 +57,14 @@ private:
   }
 
 public:
-  explicit FunctionVisitor(CompilerInstance& ci,
-                           StringRef srcFile,
-                           bool printBasename)
+  explicit Visitor(CompilerInstance& ci, StringRef srcFile, bool printBasename)
       : srcFile(srcFile), srcMgr(ci.getSourceManager()),
         mangler(*ci.getASTContext().createMangleContext()),
         astIrContext(createSingletonAstIrContext(ci, printBasename)) {
     ;
   }
 
-  virtual ~FunctionVisitor() = default;
+  virtual ~Visitor() = default;
 
   bool VisitFunctionDecl(FunctionDecl* decl) {
     if (decl->hasBody() and (getFileName(decl) == this->srcFile))
@@ -79,21 +77,26 @@ public:
 
 // The consumer does nothing but traverse the top-level decl to get at all
 // the decls below.
-class FunctionConsumer : public ASTConsumer {
+class Consumer : public ASTConsumer {
 private:
-  FunctionVisitor visitor;
+  CompilerInstance& ci;
+  Visitor visitor;
 
 public:
-  explicit FunctionConsumer(CompilerInstance& compiler,
-                            StringRef srcFile,
-                            bool printBasename)
-      : visitor(compiler, srcFile, printBasename) {
+  explicit Consumer(CompilerInstance& ci, StringRef srcFile, bool printBasename)
+      : ci(ci), visitor(ci, srcFile, printBasename) {
     ;
   }
 
-  virtual ~FunctionConsumer() = default;
+  virtual ~Consumer() = default;
 
   virtual void HandleTranslationUnit(ASTContext& context) {
+    // If there are parse errors in the file, they will be recorded in the
+    // diagnostics. Since this will not attempt to fix those, don't go any
+    // further here.
+    if (this->ci.getDiagnostics().getNumErrors())
+      return;
+
     visitor.TraverseDecl(context.getTranslationUnitDecl());
   }
 };
@@ -102,6 +105,7 @@ public:
 // specialized ASTConsumer object.
 class PluginAstIrMatch : public PluginASTAction {
 private:
+  // Parameters set depending on command-line options passed to the plugin.
   bool printBasename;
 
 public:
@@ -110,8 +114,8 @@ public:
   }
 
 protected:
-  std::unique_ptr<ASTConsumer>
-  CreateASTConsumer(CompilerInstance& compiler, StringRef srcFile) override {
+  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance& compiler,
+                                                 StringRef srcFile) override {
     // Since this is done before codegen, clang might delete the ASTContext to
     // reduce memory usage. But we need it around because the IR passes that
     // run afterwards will need it.
@@ -119,7 +123,7 @@ protected:
 
     llvm::errs() << "Source: " << srcFile << "\n";
 
-    return std::make_unique<FunctionConsumer>(compiler, srcFile, printBasename);
+    return std::make_unique<Consumer>(compiler, srcFile, printBasename);
   }
 
   // Arguments to the plugin can be passed using -plugin-arg.
@@ -145,13 +149,17 @@ protected:
                      << "can be kept alive and used by LLVM IR passes. It "
                      << "simply looks up the source location of functions "
                      << "defined in the source file being compiled and prints "
-                     << "that location to the terminal." << "\n\n"
+                     << "that location to the terminal."
+                     << "\n\n"
                      << "The plugin can be passed the following optional "
-                     << "arguments" << "\n\n"
+                     << "arguments"
+                     << "\n\n"
                      << "    -print-basename  Print only the basename of the "
-                     << "source file where the function " << "\n"
+                     << "source file where the function "
+                     << "\n"
                      << "                     is defined instead of the "
-                     << "print the entire path" << "\n\n\n";
+                     << "print the entire path"
+                     << "\n\n\n";
     return true;
   }
 
@@ -173,8 +181,7 @@ protected:
 //
 // See the ParseArgs function for command-line options that can be passed to
 // this.The name of the shared object is set in meson.build. If the name is
-// changed there, this will have to change. Also look at the match and match++
-// files to see how to invoke clang.
+// changed there, this will have to change.
 //
 static FrontendPluginRegistry::Add<PluginAstIrMatch>
     FunctionAction("AstIrMatch",

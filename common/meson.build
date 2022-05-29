@@ -15,8 +15,10 @@
 #
 
 config = configuration_data()
+config.set('name', meson.project_name())
 config.set('version', meson.project_version())
+config.set('license', meson.project_license())
 
-configure_file(input: 'config.h.in',
-               output: 'config.h',
+configure_file(input: 'Config.h.in',
+               output: 'Config.h',
                configuration: config)
