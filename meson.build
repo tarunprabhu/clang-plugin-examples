@@ -25,14 +25,12 @@ project('clang-plugin-examples', ['c', 'cpp'],
         ],
         meson_version: '>=0.55')
 
-fs = import('fs')
-
+# The default value of with-llvm-config is 'llvm-config'. If the user specifies
+# a binary to use, try to use it first. If the binary could not be found or if
+# it does not seem to be a valid program, revert to the first llvm-config
+# executable found from $PATH.
 llvm_config_bin = get_option('with-llvm-config')
-if (llvm_config_bin != 'llvm-config')
-  llvm_config = find_program([llvm_config_bin, 'llvm-config'], required: true)
-else
-  llvm_config = find_program('llvm-config', required: true)
-endif
+llvm_config = find_program([llvm_config_bin, 'llvm-config'], required: true)
 
 llvm_version = run_command(llvm_config, '--version', check: true)\
                           .stdout().strip()
@@ -48,8 +46,11 @@ endif
 
 llvm_incdir = run_command(llvm_config, '--includedir', check: true)\
                          .stdout().strip()
+message('LLVM include dir: ' + llvm_incdir)
+
 llvm_libdir = run_command(llvm_config, '--libdir', check: true)\
                          .stdout().strip()
+message('LLVM lib dir: ' + llvm_libdir)
 
 cxx = meson.get_compiler('cpp')
 libclang = cxx.find_library('libclang', dirs: llvm_libdir, required: true)
@@ -62,5 +63,6 @@ extlibs = [libclang, libclang_cpp, libllvm]
 subdir('common')
 subdir('add-braces')
 subdir('ast-ir-match')
-# subdir('loop-demarcator')
+# subdir('instrument')
+subdir('loop-demarcator')
 subdir('loop-extractor')
