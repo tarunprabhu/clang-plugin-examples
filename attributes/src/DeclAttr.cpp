@@ -44,11 +44,11 @@ MyDeclAttrInfo::MyDeclAttrInfo() : attrContext(getSingletonAttrContext()) {
   // The number of optional arguments for the attribute.
   this->OptArgs = 1;
 
-  // Set to 1 if this attribute can only be applied to types.
+  // Set to true if this attribute can be applied to types.
   this->IsType = false;
 
-  // Set to 0 if this attribute can only be applied to Decl's.
-  // Set to 1 if this attribute can be applied to Stmt's.
+  // Set to false if this attribute can only be applied to Decl's.
+  // Set to true if this attribute can only be applied to Stmt's.
   this->IsStmt = false;
 
   // The various spellings of this attribute. This allows the attribute to
