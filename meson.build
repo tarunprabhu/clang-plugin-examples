@@ -63,6 +63,7 @@ extlibs = [libclang, libclang_cpp, libllvm]
 subdir('common')
 subdir('add-braces')
 subdir('ast-ir-match')
+subdir('attributes')
 # subdir('instrument')
 subdir('loop-demarcator')
 subdir('loop-demarcator-2')
