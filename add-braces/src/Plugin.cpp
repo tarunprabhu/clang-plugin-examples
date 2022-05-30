@@ -162,7 +162,7 @@ protected:
 
   // This will be run before the main action. If the main action is codegen (in
   // clang-speak, codegen is understood to be LLVM-IR generation), this will be
-  // run after LLVM-IR is generated.
+  // run before LLVM-IR is generated.
   //
   // By implementing this method, we are ensuring that the plugin is run
   // automatically.

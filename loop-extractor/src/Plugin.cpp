@@ -215,7 +215,7 @@ protected:
 
   // This will be run before the main action. If the main action is codegen (in
   // clang-speak, codegen is understood to be LLVM-IR generation), this will be
-  // run after LLVM-IR is generated. In this case, it doesn't actually matter
+  // run before LLVM-IR is generated. In this case, it doesn't actually matter
   // when it is run since we are only interested in demonstrating how a
   // pragma could be associated with an AST node, but if we wanted to do
   // something more sophisticated, it would matter when this plugin ran.
