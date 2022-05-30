@@ -1,7 +1,8 @@
 # Attributes
 
 This contains a Clang plugin. There are custom attributes created that can be 
-applied to functions and statements.
+applied to functions and statements. The plugin will print information about 
+the attributes associated with the corresponding decl or statement to `stderr`.
 
 # Building
 
