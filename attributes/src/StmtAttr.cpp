@@ -45,11 +45,11 @@ MyStmtAttrInfo::MyStmtAttrInfo() : attrContext(getSingletonAttrContext()) {
   this->OptArgs = 1;
 
   // Set to 1 if this attribute can only be applied to types.
-  this->IsType = 0;
+  this->IsType = false;
 
   // Set to 0 if this attribute can only be applied to Decl's.
   // Set to 1 if this attribute can be applied to Stmt's.
-  this->IsStmt = 1;
+  this->IsStmt = true;
 
   // The various spellings of this attribute. This allows the attribute to
   // be specified using different syntaxes. For instance:
