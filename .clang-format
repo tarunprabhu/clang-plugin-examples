@@ -11,6 +11,6 @@ SpaceAfterCStyleCast: false
 SpacesInAngles: false
 Standard: c++14
 AllowAllParametersOfDeclarationOnNextLine: false
-BinPackArguments: false
+BinPackArguments: true
 BinPackParameters: false
 BreakBeforeBinaryOperators: All
