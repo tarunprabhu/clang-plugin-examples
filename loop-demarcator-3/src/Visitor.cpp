@@ -68,6 +68,10 @@ DeclRefExpr* Visitor::getDeclRefExpr(FunctionDecl* fn) {
 Stmt* Visitor::getCall(FunctionDecl* fn, SourceLocation loc) {
   ASTContext& ast = this->astContext;
 
+  // Simply passing the FunctionDecl wrapped in a DeclRefExpr to the CallExpr
+  // creator doesn't work. It has to be cast to a function pointer type with
+  // a specific CastKind of FunctionToPointerDecay. This may be different for
+  // methods.
   Expr* callee = ImplicitCastExpr::Create(
       ast, ast.getPointerType(fn->getType()), CK_FunctionToPointerDecay,
       this->getDeclRefExpr(fn), nullptr, VK_PRValue, FPOptionsOverride());
@@ -150,7 +154,7 @@ void Visitor::demarcate(Stmt* stmt) {
   //
   // This is technically legal, but really, really shouldn't be!
   //
-  // The ParentMap context class only returns a const Stmt - presumably because
+  // The ParentMapContext class only returns a const Stmt - presumably because
   // calling getParent on ParentMapContext is expensive and it, therefore,
   // caches the results after the first call. However, a new ParentMapContext
   // is created each time getParent() is called, so we don't have to worry
