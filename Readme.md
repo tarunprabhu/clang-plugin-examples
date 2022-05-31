@@ -6,6 +6,15 @@ not intended to be complete and parts of this repository may end up being
 obsoleted. In all cases, refer to the official clang documentation for the 
 latest information.
 
+These plugins were written as I was exploring how to best use the framework 
+that clang provides. As I continued to write them, I became more familiar with 
+clang's internals and the API. As a result, there is some variation in the 
+way the plugins are engineered. At some point, I may either normalize all of 
+them to conform to some standard. For the moment, I recommend at least taking a
+look at the source code of several of the plugins to see if there is a "better"
+way to do what you want (for instance, avoiding the use of a global singleton
+to pass information between pragma handlers, AST visitors and LLVM passes).
+
 # Requirements
 
 This has only been tested with Clang/LLVM 13.0. At the time of writing, 
